@@ -70,7 +70,7 @@ code when you call</p>
 <p>When <code>bubble-wrap</code> is required it immediately requires <code>bubble-wrap/loader</code> which sets up the infrastructure needed to manipulate the <code>Rakefile</code> build process.  Once that is done we can freely call</p>
 
 <div class="highlight">
-<pre><span class="no">BubbleWrap</span><span class="o">.</span><span class="n">require</span> <span class="s1">'motion/core**/*.rb'</span>
+<pre><span class="no">BubbleWrap</span><span class="o">.</span><span class="n">require</span> <span class="s1">'motion/core/**/*.rb'</span>
 </pre>
 </div>
 
@@ -89,7 +89,7 @@ of <code>BW::Requirement</code> and thus has access to all it's class methods.
 The most common use cases are setting file dependencies:</p>
 
 <div class="highlight">
-<pre><span class="no">BW</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="s1">'motion/core**/*.rb'</span><span class="p">)</span> <span class="k">do</span>
+<pre><span class="no">BW</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="s1">'motion/core/**/*.rb'</span><span class="p">)</span> <span class="k">do</span>
   <span class="n">file</span><span class="p">(</span><span class="s1">'motion/core/device/screen.rb'</span><span class="p">)</span><span class="o">.</span><span class="n">depends_on</span> <span class="s1">'motion/core/device.rb'</span>
 <span class="k">end</span>
 </pre>

@@ -63,7 +63,7 @@
 <h2>Setup</h2>
 
 <ol>
-<li>Edit the <code>Rakefile</code> of your RubyMotion project and add the following require line.</li>
+<li>Edit the <code>Rakefile</code> of your RubyMotion project and add the following require line:</li>
 </ol>
 <div class="highlight">
 <pre><span class="nb">require</span> <span class="s1">'bubble-wrap'</span>
@@ -72,9 +72,9 @@
 
 
 <p>BubbleWrap is split into multiple modules so that you can easily choose which parts
-are included at compile-time. </p>
+are included at compile-time.</p>
 
-<p>The above example requires all the wrappers/helpers. If you wish to only
+<p>The above example requires the <code>core</code> and <code>http</code> modules. If you wish to only
 include the core modules use the following line of code instead:</p>
 
 <div class="highlight">
@@ -87,6 +87,30 @@ include the core modules use the following line of code instead:</p>
 
 <div class="highlight">
 <pre><span class="nb">require</span> <span class="s1">'bubble-wrap/http'</span>
+</pre>
+</div>
+
+
+<p>If you wish to only include the <code>RSS Parser</code> wrapper:</p>
+
+<div class="highlight">
+<pre><span class="nb">require</span> <span class="s1">'bubble-wrap/rss_parser'</span>
+</pre>
+</div>
+
+
+<p>If you wish to only include the <code>Reactor</code> wrapper:</p>
+
+<div class="highlight">
+<pre><span class="nb">require</span> <span class="s1">'bubble-wrap/reactor'</span>
+</pre>
+</div>
+
+
+<p>If you want to include everything (ie kitchen sink mode) you can save time and do:</p>
+
+<div class="highlight">
+<pre><span class="nb">require</span> <span class="s1">'bubble-wrap/all'</span>
 </pre>
 </div>
 
@@ -130,6 +154,8 @@ use the versioned gem.</p>
 <span class="c1"># creates and shows an alert message.</span>
 <span class="o">&gt;</span> <span class="no">App</span><span class="o">.</span><span class="n">run_after</span><span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">5</span><span class="p">)</span> <span class="p">{</span>  <span class="nb">p</span> <span class="s2">"It's </span><span class="si">#{</span><span class="no">Time</span><span class="o">.</span><span class="n">now</span><span class="si">}</span><span class="s2">"</span>   <span class="p">}</span>
 <span class="c1"># Runs the block after 0.5 seconds.</span>
+<span class="o">&gt;</span> <span class="no">App</span><span class="o">.</span><span class="n">open_url</span><span class="p">(</span><span class="s2">"http://matt.aimonetti.net"</span><span class="p">)</span>
+<span class="c1"># Opens the url using the device's browser. (accepts a string url or an instance of `NSURL`.</span>
 <span class="o">&gt;</span> <span class="no">App</span><span class="o">::</span><span class="no">Persistence</span><span class="o">[</span><span class="s1">'channels'</span><span class="o">]</span> <span class="c1"># application specific persistence storage</span>
 <span class="c1"># ['NBC', 'ABC', 'Fox', 'CBS', 'PBS']</span>
 <span class="o">&gt;</span> <span class="no">App</span><span class="o">::</span><span class="no">Persistence</span><span class="o">[</span><span class="s1">'channels'</span><span class="o">]</span> <span class="o">=</span> <span class="o">[</span><span class="s1">'TF1'</span><span class="p">,</span> <span class="s1">'France 2'</span><span class="p">,</span> <span class="s1">'France 3'</span><span class="o">]</span>
@@ -375,19 +401,135 @@ The API uses async calls and blocks to stay as simple as possible.</p>
     <span class="n">json</span> <span class="o">=</span> <span class="no">BubbleWrap</span><span class="o">::</span><span class="no">JSON</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="o">.</span><span class="n">to_str</span><span class="p">)</span>
     <span class="nb">p</span> <span class="n">json</span><span class="o">[</span><span class="s1">'id'</span><span class="o">]</span>
   <span class="k">elsif</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="o">.</span><span class="n">to_s</span> <span class="o">=~</span> <span class="sr">/40\d/</span>
-    <span class="n">alert</span><span class="p">(</span><span class="s2">"Login failed"</span><span class="p">)</span> <span class="c1"># helper provided by the kernel file in this repo.</span>
+    <span class="no">App</span><span class="o">.</span><span class="n">alert</span><span class="p">(</span><span class="s2">"Login failed"</span><span class="p">)</span>
   <span class="k">else</span>
-    <span class="n">alert</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">error_message</span><span class="p">)</span>
+    <span class="no">App</span><span class="o">.</span><span class="n">alert</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">error_message</span><span class="p">)</span>
   <span class="k">end</span>
 <span class="k">end</span>
 </pre>
 </div>
 
 
+<h2>RSS Parser</h2>
+
+<p>The RSS Parser provides an easy interface to consume RSS feeds in an
+asynchronous (non blocking) way.</p>
+
+<div class="highlight">
+<pre><span class="n">feed_parser</span> <span class="o">=</span> <span class="no">BW</span><span class="o">::</span><span class="no">RSSParser</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">"http://feeds2.feedburner.com/sdrbpodcast"</span><span class="p">)</span>
+<span class="n">feed_parser</span><span class="o">.</span><span class="n">parse</span> <span class="k">do</span> <span class="o">|</span><span class="n">item</span><span class="o">|</span>
+  <span class="c1"># called asynchronously as items get parsed</span>
+  <span class="nb">p</span> <span class="n">item</span><span class="o">.</span><span class="n">title</span>
+<span class="k">end</span>
+</pre>
+</div>
+
+
+<p>The yielded RSS item is of type <code>RSSParser::RSSItem</code> and has the
+following attributes:</p>
+
+<ul>
+<li>title</li>
+<li>description</li>
+<li>link</li>
+<li>guid</li>
+<li>pubDate</li>
+<li>enclosure</li>
+</ul>
+<p>The item can be converted into a hash by calling <code>to_hash</code> on it.</p>
+
+<h3>Delegate</h3>
+
+<p>You can also designate a delegate to the parser and implement change
+state callbacks:</p>
+
+<div class="highlight">
+<pre><span class="n">feed_parser</span> <span class="o">=</span> <span class="no">BW</span><span class="o">::</span><span class="no">RSSParser</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">"http://feeds.feedburner.com/sdrbpodcast"</span><span class="p">)</span>
+<span class="n">feed_parser</span><span class="o">.</span><span class="n">delegate</span> <span class="o">=</span> <span class="nb">self</span>
+<span class="n">feed</span><span class="o">.</span><span class="n">parse</span> <span class="k">do</span> <span class="o">|</span><span class="n">item</span><span class="o">|</span>
+  <span class="nb">p</span> <span class="n">item</span><span class="o">.</span><span class="n">title</span>
+<span class="k">end</span>
+
+<span class="c1"># Delegate method</span>
+<span class="k">def</span> <span class="nf">when_parser_initializes</span>
+  <span class="nb">p</span> <span class="s2">"The parser is ready!"</span>
+<span class="k">end</span>
+
+<span class="k">def</span> <span class="nf">when_parser_parses</span>
+  <span class="nb">p</span> <span class="s2">"The parser started parsing the document"</span>
+<span class="k">end</span>
+
+<span class="k">def</span> <span class="nf">when_parser_is_done</span>
+  <span class="nb">p</span> <span class="s2">"The feed is entirely parsed, congratulations!"</span>
+<span class="k">end</span>
+</pre>
+</div>
+
+
+<p>These delegate methods are optional, however, you might find the
+<code>when_parser_is_done</code> callback useful if you collected all the items and
+want to process all at once for instance.</p>
+
+<h3>Parsing a remote content or actual data</h3>
+
+<p>You have the choice to initialize a parser instance with a string
+representing an URL, an instance of <code>NSURL</code> or my specifying that the
+passed param is some data to parse directly.</p>
+
+<div class="highlight">
+<pre><span class="c1"># string representing an url:</span>
+<span class="n">feed_parser</span> <span class="o">=</span> <span class="no">BW</span><span class="o">::</span><span class="no">RSSParser</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">"http://feeds2.feedburner.com/sdrbpodcast"</span><span class="p">)</span>
+<span class="c1"># a NSURL instance:</span>
+<span class="n">url</span> <span class="o">=</span>  <span class="no">NSURL</span><span class="o">.</span><span class="n">alloc</span><span class="o">.</span><span class="n">initWithString</span><span class="p">(</span><span class="s2">"http://matt.aimonetti.net/atom.xml"</span><span class="p">)</span>
+<span class="n">feed_parser</span> <span class="o">=</span> <span class="no">BW</span><span class="o">::</span><span class="no">RSSParser</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+<span class="c1"># Some data</span>
+<span class="n">feed</span> <span class="o">=</span> <span class="no">File</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">'atom.xml'</span><span class="p">)</span>
+<span class="n">feed_parser</span> <span class="o">=</span> <span class="no">BW</span><span class="o">::</span><span class="no">RSSParser</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">feed</span><span class="p">,</span> <span class="kp">true</span><span class="p">)</span>
+</pre>
+</div>
+
+
+<h1>BW::Dispatch</h1>
+
+<p>TODO: Write a description and some examples</p>
+
 <p>Do you have a suggestion for a specific wrapper? Feel free to open an
 issue/ticket and tell us about what you are after. If you have a
 wrapper/helper you are using and are thinking that others might enjoy,
 please send a pull request (with tests if possible).</p>
+
+<h1></h1>
+
+<h2>Installation</h2>
+
+<p>Add this line to your application's Gemfile:</p>
+
+<pre><code>gem 'bw-dispatch'
+</code></pre>
+
+<p>And then execute:</p>
+
+<pre><code>$ bundle
+</code></pre>
+
+<p>Or install it yourself as:</p>
+
+<pre><code>$ gem install bw-dispatch
+</code></pre>
+
+<h2>Usage</h2>
+
+<p>TODO: Write usage instructions here</p>
+
+<h2>Contributing</h2>
+
+<ol>
+<li>Fork it</li>
+<li>Create your feature branch (<code>git checkout -b my-new-feature</code>)</li>
+<li>Commit your changes (<code>git commit -am 'Added some feature'</code>)</li>
+<li>Push to the branch (<code>git push origin my-new-feature</code>)</li>
+<li>Create new Pull Request</li>
+</ol>
 </body></html>
 
        </section>

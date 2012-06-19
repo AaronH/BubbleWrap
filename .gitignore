@@ -1,2 +1,4 @@
 0
 *.md
+.repl_history
+build/
