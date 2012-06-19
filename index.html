@@ -412,6 +412,8 @@ The API uses async calls and blocks to stay as simple as possible.</p>
 
 <h2>RSS Parser</h2>
 
+<p><strong>Since: &gt; version 1.0.0</strong></p>
+
 <p>The RSS Parser provides an easy interface to consume RSS feeds in an
 asynchronous (non blocking) way.</p>
 
@@ -439,6 +441,8 @@ following attributes:</p>
 <p>The item can be converted into a hash by calling <code>to_hash</code> on it.</p>
 
 <h3>Delegate</h3>
+
+<p><strong>Since: &gt; version 1.0.0</strong></p>
 
 <p>You can also designate a delegate to the parser and implement change
 state callbacks:</p>
@@ -489,9 +493,170 @@ passed param is some data to parse directly.</p>
 </div>
 
 
-<h1>BW::Dispatch</h1>
+<h2>Reactor</h2>
 
-<p>TODO: Write a description and some examples</p>
+<p><strong>Since: &gt; version 1.0.0</strong></p>
+
+<p><code>BubbleWrap::Reactor</code> is a simplified, mostly complete implementation of
+the <a href="http://rubyeventmachine.com/">Event Machine</a> API.  In fact 
+<code>BubbleWrap::Reactor</code> is aliased to <code>EM</code> in the runtime environment.</p>
+
+<h3>Deferables</h3>
+
+<p>BubbleWrap provides both a <code>Deferrable</code> mixin and a <code>DefaultDeferrable</code>
+class, which simply mixes in deferrable behaviour if you don't want to
+implement your own.</p>
+
+<p>A deferrable is an object with four states: unknown, successful, failure
+and timeout.  When you initially create a deferrable it is in an unknown
+state, however you can assign callbacks to be run when the object
+changes to either successful or failure state.</p>
+
+<h4>Success</h4>
+
+<div class="highlight">
+<pre><span class="o">&gt;</span> <span class="n">d</span> <span class="o">=</span> <span class="no">EM</span><span class="o">::</span><span class="no">DefaultDeferrable</span><span class="o">.</span><span class="n">new</span>
+<span class="o">=&gt;</span> <span class="c1">#&lt;BubbleWrap::Reactor::DefaultDeferrable:0x6d859a0&gt;</span>
+<span class="o">&gt;</span> <span class="n">d</span><span class="o">.</span><span class="n">callback</span> <span class="p">{</span> <span class="o">|</span><span class="n">what</span><span class="o">|</span> <span class="nb">puts</span> <span class="s2">"Great </span><span class="si">#{</span><span class="n">what</span><span class="si">}</span><span class="s2">!"</span> <span class="p">}</span>
+<span class="o">=&gt;</span> <span class="o">[</span><span class="c1">#&lt;Proc:0x6d8a1e0&gt;]</span>
+<span class="o">&gt;</span> <span class="n">d</span><span class="o">.</span><span class="n">succeed</span> <span class="s2">"justice"</span>
+<span class="no">Great</span> <span class="n">justice!</span>
+<span class="o">=&gt;</span> <span class="kp">nil</span>
+</pre>
+</div>
+
+
+<h4>Failure</h4>
+
+<div class="highlight">
+<pre><span class="o">&gt;</span> <span class="n">d</span> <span class="o">=</span> <span class="no">EM</span><span class="o">::</span><span class="no">DefaultDeferrable</span><span class="o">.</span><span class="n">new</span>
+<span class="o">=&gt;</span> <span class="c1">#&lt;BubbleWrap::Reactor::DefaultDeferrable:0x8bf3ee0&gt;</span>
+<span class="o">&gt;</span> <span class="n">d</span><span class="o">.</span><span class="n">errback</span> <span class="p">{</span> <span class="o">|</span><span class="n">what</span><span class="o">|</span> <span class="nb">puts</span> <span class="s2">"Great </span><span class="si">#{</span><span class="n">what</span><span class="si">}</span><span class="s2">!"</span> <span class="p">}</span>
+<span class="o">=&gt;</span> <span class="o">[</span><span class="c1">#&lt;Proc:0x8bf3ef0&gt;]</span>
+<span class="o">&gt;</span> <span class="n">d</span><span class="o">.</span><span class="n">fail</span> <span class="s2">"sadness"</span>
+<span class="no">Great</span> <span class="n">sadness!</span>
+<span class="o">=&gt;</span> <span class="kp">nil</span>
+</pre>
+</div>
+
+
+<h4>Timeout</h4>
+
+<div class="highlight">
+<pre><span class="o">&gt;</span> <span class="n">d</span> <span class="o">=</span> <span class="no">EM</span><span class="o">::</span><span class="no">DefaultDeferrable</span><span class="o">.</span><span class="n">new</span>
+<span class="o">=&gt;</span> <span class="c1">#&lt;BubbleWrap::Reactor::DefaultDeferrable:0x8bf5910&gt;</span>
+<span class="o">&gt;</span> <span class="n">d</span><span class="o">.</span><span class="n">errback</span> <span class="p">{</span> <span class="nb">puts</span> <span class="s2">"Great scott!"</span> <span class="p">}</span>
+<span class="o">=&gt;</span> <span class="o">[</span><span class="c1">#&lt;Proc:0x8bf6350&gt;]</span>
+<span class="o">&gt;</span> <span class="n">d</span><span class="o">.</span><span class="n">timeout</span> <span class="mi">2</span>
+<span class="o">=&gt;</span> <span class="c1">#&lt;BubbleWrap::Reactor::Timer:0x6d920a0 @timer=#&lt;__NSCFTimer:0x6d91990&gt;&gt;</span>
+<span class="c1"># wait...</span>
+<span class="o">&gt;</span> <span class="no">Great</span> <span class="n">scott!</span>
+</pre>
+</div>
+
+
+<h3>Timers</h3>
+
+<p><em>All timers can be cancelled using <code>EM.cancel_timer</code>.</em></p>
+
+<h4>One-shot timers</h4>
+
+<div class="highlight">
+<pre><span class="o">&gt;</span> <span class="no">EM</span><span class="o">.</span><span class="n">add_timer</span> <span class="mi">1</span><span class="o">.</span><span class="mi">0</span> <span class="k">do</span>
+<span class="o">&gt;</span>   <span class="nb">puts</span> <span class="s2">"Great scott!"</span>
+<span class="o">&gt;</span> <span class="k">end</span>
+<span class="o">=&gt;</span> <span class="mi">146335904</span>
+<span class="o">&gt;</span> <span class="no">Great</span> <span class="n">scott!</span>
+</pre>
+</div>
+
+
+<h4>Periodic timers</h4>
+
+<div class="highlight">
+<pre><span class="o">&gt;</span> <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="o">=&gt;</span> <span class="mi">0</span>
+<span class="o">&gt;</span> <span class="n">timer</span> <span class="o">=</span> <span class="no">EM</span><span class="o">.</span><span class="n">add_periodic_timer</span> <span class="mi">1</span><span class="o">.</span><span class="mi">0</span> <span class="k">do</span>
+<span class="o">&gt;</span>   <span class="n">count</span> <span class="o">=</span> <span class="n">count</span> <span class="o">+</span> <span class="mi">1</span>
+<span class="o">&gt;</span>   <span class="nb">puts</span> <span class="s2">"Great scott!"</span>
+<span class="o">&gt;</span>   <span class="p">(</span><span class="n">count</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">)</span> <span class="o">||</span> <span class="no">EM</span><span class="o">.</span><span class="n">cancel_timer</span><span class="p">(</span><span class="n">timer</span><span class="p">)</span>
+<span class="o">&gt;</span> <span class="k">end</span>
+<span class="o">=&gt;</span> <span class="mi">146046832</span>
+<span class="o">&gt;</span> <span class="no">Great</span> <span class="n">scott!</span>
+<span class="no">Great</span> <span class="n">scott!</span>
+<span class="no">Great</span> <span class="n">scott!</span>
+<span class="no">Great</span> <span class="n">scott!</span>
+<span class="no">Great</span> <span class="n">scott!</span>
+<span class="no">Great</span> <span class="n">scott!</span>
+<span class="no">Great</span> <span class="n">scott!</span>
+<span class="no">Great</span> <span class="n">scott!</span>
+<span class="no">Great</span> <span class="n">scott!</span>
+<span class="no">Great</span> <span class="n">scott!</span>
+</pre>
+</div>
+
+
+<h3>Scheduling operations</h3>
+
+<p>You can use <code>EM.schedule</code> to schedule blocks to be executed 
+asynchronously.  BubbleWrap deviates from the EventMachine
+API here in that it also provides <code>EM.schedule_on_main</code> which
+makes sure that the task is run asynchronously, but on the 
+application's main thread - this is necessary if you are 
+updating the user interface.</p>
+
+<div class="highlight">
+<pre><span class="o">&gt;</span> <span class="no">EM</span><span class="o">.</span><span class="n">schedule</span> <span class="p">{</span> <span class="nb">puts</span> <span class="no">Thread</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">object_id</span> <span class="p">}</span>
+<span class="mi">146027920</span>
+<span class="o">=&gt;</span> <span class="kp">nil</span>
+<span class="o">&gt;</span> <span class="no">EM</span><span class="o">.</span><span class="n">schedule_on_main</span> <span class="p">{</span> <span class="nb">puts</span> <span class="no">Thread</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">object_id</span> <span class="p">}</span>
+<span class="mi">112222480</span>
+<span class="o">=&gt;</span> <span class="kp">nil</span>
+</pre>
+</div>
+
+
+<h3>Deferrable operations</h3>
+
+<p>You can also use <code>EM.defer</code> in much the same way as <code>EM.schedule</code>
+with one important difference, you can pass in a second <code>proc</code> 
+which will be called when the first has completed, and be passed
+it's result as an argument:</p>
+
+<div class="highlight">
+<pre><span class="o">&gt;</span> <span class="n">operation</span> <span class="o">=</span> <span class="nb">proc</span> <span class="p">{</span> <span class="mi">99</span> <span class="p">}</span>
+<span class="o">=&gt;</span> <span class="c1">#&lt;Proc:0x6d763c0&gt;</span>
+<span class="o">&gt;</span> <span class="n">callback</span> <span class="o">=</span> <span class="nb">proc</span> <span class="p">{</span> <span class="o">|</span><span class="n">speed</span><span class="o">|</span> <span class="nb">puts</span> <span class="n">speed</span> <span class="o">&gt;=</span> <span class="mi">99</span> <span class="o">?</span> <span class="s2">"Time travel!"</span> <span class="p">:</span> <span class="s2">"Conventional travel!"</span> <span class="p">}</span>
+<span class="o">=&gt;</span> <span class="c1">#&lt;Proc:0x8bd3910&gt;</span>
+<span class="o">&gt;</span> <span class="no">EM</span><span class="o">.</span><span class="n">defer</span><span class="p">(</span><span class="n">operation</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>
+<span class="o">=&gt;</span> <span class="kp">nil</span>
+<span class="no">Time</span> <span class="n">travel!</span>
+</pre>
+</div>
+
+
+<h3>Events</h3>
+
+<p>Although not part of the EventMachine API, BubbleWrap provides
+an <code>Eventable</code> mixin for use instrumenting objects with simple
+event triggering behaviour. <code>BubbleWrap::Reactor</code> uses this
+behind the scenes in several places, and as it's a very handy
+idiom it is available as a public API.</p>
+
+<div class="highlight">
+<pre><span class="o">&gt;</span> <span class="n">o</span> <span class="o">=</span> <span class="no">Class</span><span class="o">.</span><span class="n">new</span> <span class="p">{</span> <span class="kp">include</span> <span class="no">EM</span><span class="o">::</span><span class="no">Eventable</span> <span class="p">}</span><span class="o">.</span><span class="n">new</span>
+<span class="o">=&gt;</span> <span class="c1">#&lt;#&lt;Class:0x6dc1310&gt;:0x6dc2ec0&gt;</span>
+<span class="o">&gt;</span> <span class="n">o</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="ss">:november_5_1955</span><span class="p">)</span> <span class="p">{</span> <span class="nb">puts</span> <span class="s2">"Ow!"</span> <span class="p">}</span>
+<span class="o">=&gt;</span> <span class="o">[</span><span class="c1">#&lt;Proc:0x6dc6300&gt;]</span>
+<span class="o">&gt;</span> <span class="n">o</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="ss">:november_5_1955</span><span class="p">)</span> <span class="p">{</span> <span class="nb">puts</span> <span class="s2">"Flux capacitor!"</span> <span class="p">}</span>
+<span class="o">=&gt;</span> <span class="o">[</span><span class="c1">#&lt;Proc:0x6dc6300&gt;, #&lt;Proc:0x6dc1ba0&gt;]</span>
+<span class="o">&gt;</span> <span class="n">o</span><span class="o">.</span><span class="n">trigger</span><span class="p">(</span><span class="ss">:november_5_1955</span><span class="p">)</span>
+<span class="no">Ow</span><span class="o">!</span>
+<span class="no">Flux</span> <span class="n">capacitor!</span>
+<span class="o">=&gt;</span> <span class="o">[</span><span class="kp">nil</span><span class="p">,</span> <span class="kp">nil</span><span class="o">]</span>
+</pre>
+</div>
+
 
 <p>Do you have a suggestion for a specific wrapper? Feel free to open an
 issue/ticket and tell us about what you are after. If you have a
